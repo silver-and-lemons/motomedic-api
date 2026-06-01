@@ -32,3 +32,67 @@ The server will start with hot-reloading, meaning it will automatically restart 
 -   **Formatter**: Prettier
 -   **Testing**: Vitest
 -   **Development Runner**: `tsx`
+
+## Git Workflow
+
+### Branch Strategy
+
+```
+main        production — merges only from staging
+  ↑
+staging     pre-production QA — merges only from dev
+  ↑
+dev         integration — feature branches merge here
+  ↑
+feature/*   individual work — created from dev, merged back to dev
+```
+
+### Workflow
+
+1. Start from the latest `dev`:
+   ```
+   git checkout dev && git pull
+   ```
+
+2. Create a feature branch:
+   ```
+   git checkout -b feat/my-feature
+   ```
+
+3. Work, commit (Conventional Commits), push.
+
+4. Open a PR into `dev`. Squash-merge on approval.
+
+5. When `dev` has a stable set of features, open a PR into `staging`.
+
+6. After QA on `staging`, open a PR into `main`.
+
+### Branch Naming
+
+```
+<type>/<kebab-case-description>
+```
+
+Types: `feat`, `fix`, `chore`, `refactor`, `docs`, `test`
+
+Examples:
+- `feat/add-auth-flow`
+- `fix/user-login-redirect`
+- `chore/update-deps`
+
+## Features
+
+### Environment Configuration — `src/shared/config/env.ts`
+Typed config object with `port`, `nodeEnv`, `isProduction` derived from environment variables.
+
+### Logger — `src/shared/utils/logger.ts`
+Winston logger with console transport — JSON format in production, colorized in development.
+
+### Express App — `src/app.ts`
+Express application with `express.json()` body parser and global error handler mounted.
+
+### Server Entry — `server.ts`
+Entry point that imports the configured app and listens on the port from env config.
+
+### Error Middleware — `src/shared/middleware/error.middleware.ts`
+Centralized error handler that logs the error via Winston and returns a 500 JSON response.
