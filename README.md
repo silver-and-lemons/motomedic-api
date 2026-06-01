@@ -80,6 +80,14 @@ Examples:
 - `fix/user-login-redirect`
 - `chore/update-deps`
 
+### Module Conventions
+
+Each feature module under `src/` must include a `README.md` documenting:
+- Purpose and scope
+- Directory structure
+- Key types and DTOs
+- API endpoints (if applicable)
+
 ## Features
 
 ### Environment Configuration — `src/shared/config/env.ts`
