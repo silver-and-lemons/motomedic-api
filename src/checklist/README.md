@@ -73,6 +73,27 @@ Interactive API documentation is available at `/api/docs` in development.
 
 OpenAPI paths and schemas are defined in `checklist.openapi.ts` using typed plain objects. As more features are added, each feature module will export its own paths and schemas to be merged in the central OpenAPI config (`src/shared/config/openapi.ts`).
 
+## Testing
+
+25 unit tests across 2 test files:
+
+| File | Tests | Scope |
+|---|---|---|
+| `tests/checklist.service.test.ts` | 19 | Core logic — `generate()` and `evaluate()` |
+| `tests/checklist.controller.test.ts` | 6 | HTTP handlers — status codes, validation, error forwarding |
+
+### Coverage
+
+- Every conditional rule tested with positive and negative assertions
+- Item status, profile echo, timestamp format verified
+- Controller: 201/200 happy paths, 400 on null body, `next(err)` on service failure
+
+### Run
+
+```bash
+npm test
+```
+
 ## Key Types
 
 | Type | Defined In | Purpose |

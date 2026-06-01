@@ -21,6 +21,7 @@ The server will start with hot-reloading, meaning it will automatically restart 
 -   `npm run build`: Compiles the TypeScript code to JavaScript in the `dist` directory.
 -   `npm run lint`: Lints the codebase for potential errors.
 -   `npm run format`: Formats the code using Prettier.
+-   `npm test`: Runs all unit tests via Vitest.
 
 ## Tech Stack
 
@@ -110,4 +111,4 @@ Centralized error handler that logs the error via Winston and returns a 500 JSON
 Interactive Swagger UI served at `/api/docs` in non-production environments via swagger-jsdoc annotations in DTO and controller files.
 
 ### Checklist Logic Engine — `src/checklist/`
-Generates and evaluates motorcycle-specific checklist items from a rider's questionnaire profile. Rules engine with 5 always-shown and 8 conditional checks based on bike type, engine size, fuel system, cooling, and age.
+Generates and evaluates motorcycle-specific checklist items from a rider's questionnaire profile. Rules engine with 5 always-shown and 8 conditional checks based on bike type, engine size, fuel system, cooling, and age. 25 unit tests covering all rules, controller handlers, and edge cases.
