@@ -1,3 +1,7 @@
+/**
+ * Checklist module routes.
+ * Maps HTTP endpoints to controller handlers.
+ */
 import { Router } from "express";
 import * as checklistController from "./checklist.controller.js";
 

@@ -32,6 +32,7 @@ The server will start with hot-reloading, meaning it will automatically restart 
 -   **Formatter**: Prettier
 -   **Testing**: Vitest
 -   **Development Runner**: `tsx`
+-   **API Docs**: Swagger UI (swagger-jsdoc)
 
 ## Git Workflow
 
@@ -104,3 +105,9 @@ Entry point that imports the configured app and listens on the port from env con
 
 ### Error Middleware — `src/shared/middleware/error.middleware.ts`
 Centralized error handler that logs the error via Winston and returns a 500 JSON response.
+
+### OpenAPI Documentation — `src/shared/config/openapi.ts`
+Interactive Swagger UI served at `/api/docs` in non-production environments via swagger-jsdoc annotations in DTO and controller files.
+
+### Checklist Logic Engine — `src/checklist/`
+Generates and evaluates motorcycle-specific checklist items from a rider's questionnaire profile. Rules engine with 5 always-shown and 8 conditional checks based on bike type, engine size, fuel system, cooling, and age.
