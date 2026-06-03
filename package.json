@@ -4,7 +4,7 @@
   "description": "This project was generated using the `create-lscs-api` scaffolder, based on the official La Salle Computer Society (LSCS) Backend Standards.",
   "main": "dist/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
     "start": "node .",
     "prestart": "npm run build",
     "dev": "tsx watch server.ts",
@@ -19,14 +19,19 @@
   "type": "module",
   "dependencies": {
     "express": "^5.2.1",
+    "swagger-ui-express": "^5.0.1",
     "winston": "^3.19.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^25.9.1",
+    "@types/supertest": "^7.2.0",
+    "@types/swagger-ui-express": "^4.1.8",
     "eslint": "^10.4.0",
     "eslint-config-prettier": "^10.1.8",
+    "openapi-types": "^12.1.3",
     "prettier": "^3.8.3",
+    "supertest": "^7.2.2",
     "tsx": "^4.22.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.60.0",

@@ -21,6 +21,7 @@ The server will start with hot-reloading, meaning it will automatically restart 
 -   `npm run build`: Compiles the TypeScript code to JavaScript in the `dist` directory.
 -   `npm run lint`: Lints the codebase for potential errors.
 -   `npm run format`: Formats the code using Prettier.
+-   `npm test`: Runs all unit tests via Vitest.
 
 ## Tech Stack
 
@@ -32,6 +33,7 @@ The server will start with hot-reloading, meaning it will automatically restart 
 -   **Formatter**: Prettier
 -   **Testing**: Vitest
 -   **Development Runner**: `tsx`
+-   **API Docs**: Swagger UI (swagger-jsdoc)
 
 ## Git Workflow
 
@@ -80,6 +82,14 @@ Examples:
 - `fix/user-login-redirect`
 - `chore/update-deps`
 
+### Module Conventions
+
+Each feature module under `src/` must include a `README.md` documenting:
+- Purpose and scope
+- Directory structure
+- Key types and DTOs
+- API endpoints (if applicable)
+
 ## Features
 
 ### Environment Configuration — `src/shared/config/env.ts`
@@ -96,3 +106,9 @@ Entry point that imports the configured app and listens on the port from env con
 
 ### Error Middleware — `src/shared/middleware/error.middleware.ts`
 Centralized error handler that logs the error via Winston and returns a 500 JSON response.
+
+### OpenAPI Documentation — `src/shared/config/openapi.ts`
+Interactive Swagger UI served at `/api/docs` in non-production environments via swagger-jsdoc annotations in DTO and controller files.
+
+### Checklist Logic Engine — `src/checklist/`
+Generates and evaluates motorcycle-specific checklist items from a rider's questionnaire profile. Rules engine with 5 always-shown and 8 conditional checks based on bike type, engine size, fuel system, cooling, and age. 25 unit tests covering all rules, controller handlers, and edge cases.
