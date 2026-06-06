@@ -102,9 +102,9 @@ const schemas = {
   EvaluateResult,
 };
 
-/** POST /api/checklist/generate — creates a checklist from a questionnaire. */
+/** POST /api/v1/checklist/generate — creates a checklist from a questionnaire. */
 const generatePath: OpenAPIV3.PathsObject = {
-  "/api/checklist/generate": {
+  "/api/v1/checklist/generate": {
     post: {
       tags: ["Checklist"],
       summary: "Generate checklist items from a motorcycle questionnaire",
@@ -133,9 +133,9 @@ const generatePath: OpenAPIV3.PathsObject = {
   },
 };
 
-/** POST /api/checklist/evaluate — evaluates items against the profile. */
+/** POST /api/v1/checklist/evaluate — evaluates items against the profile. */
 const evaluatePath: OpenAPIV3.PathsObject = {
-  "/api/checklist/evaluate": {
+  "/api/v1/checklist/evaluate": {
     post: {
       tags: ["Checklist"],
       summary: "Evaluate checklist items against a motorcycle profile",

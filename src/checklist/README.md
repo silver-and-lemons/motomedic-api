@@ -61,11 +61,11 @@ Min: 5 checks (scooter, FI, air-cooled, 2020+) — Max: 10 checks (big bike, FI,
 
 ## API Endpoints
 
-### `POST /api/checklist/generate`
+### `POST /api/v1/checklist/generate`
 
 Accepts a `MotorcycleQuestionnaire` and returns a `ChecklistResult` with all applicable items in `pending` status.
 
-### `POST /api/checklist/evaluate`
+### `POST /api/v1/checklist/evaluate`
 
 Accepts an `EvaluateInput` (profile + full items array). For now returns the items as-is with an `evaluatedAt` timestamp.
 

@@ -19,10 +19,10 @@ const fullProfile: MotorcycleQuestionnaire = {
   bikeAge: "2014-and-older",
 };
 
-describe("POST /api/checklist/generate", () => {
+describe("POST /api/v1/checklist/generate", () => {
   it("returns 201 with generated checklist items for a valid profile", async () => {
     const res = await request(app)
-      .post("/api/checklist/generate")
+      .post("/api/v1/checklist/generate")
       .send(validProfile);
 
     expect(res.status).toBe(201);
@@ -49,7 +49,7 @@ describe("POST /api/checklist/generate", () => {
 
   it("returns 201 with full set of items for a maximal big-bike profile", async () => {
     const res = await request(app)
-      .post("/api/checklist/generate")
+      .post("/api/v1/checklist/generate")
       .send(fullProfile);
 
     expect(res.status).toBe(201);
@@ -58,7 +58,7 @@ describe("POST /api/checklist/generate", () => {
 
   it("returns 400 when body is null", async () => {
     const res = await request(app)
-      .post("/api/checklist/generate")
+      .post("/api/v1/checklist/generate")
       .send(null);
 
     expect(res.status).toBe(400);
@@ -67,7 +67,7 @@ describe("POST /api/checklist/generate", () => {
 
   it("returns 400 when body is a non-object (string)", async () => {
     const res = await request(app)
-      .post("/api/checklist/generate")
+      .post("/api/v1/checklist/generate")
       .send("invalid");
 
     expect(res.status).toBe(400);
@@ -76,7 +76,7 @@ describe("POST /api/checklist/generate", () => {
 
   it("accepts empty object and returns always-shown items with defaults", async () => {
     const res = await request(app)
-      .post("/api/checklist/generate")
+      .post("/api/v1/checklist/generate")
       .send({});
 
     expect(res.status).toBe(201);
@@ -85,7 +85,7 @@ describe("POST /api/checklist/generate", () => {
 
   it("accepts invalid enum values (no runtime validation)", async () => {
     const res = await request(app)
-      .post("/api/checklist/generate")
+      .post("/api/v1/checklist/generate")
       .send({ bikeType: "tricycle", engineSize: "500cc" });
 
     expect(res.status).toBe(201);
@@ -94,7 +94,7 @@ describe("POST /api/checklist/generate", () => {
 
   it("accepts wrong field types (no runtime validation)", async () => {
     const res = await request(app)
-      .post("/api/checklist/generate")
+      .post("/api/v1/checklist/generate")
       .send({ bikeType: 123, engineSize: null, fuelSystem: true });
 
     expect(res.status).toBe(201);
@@ -102,10 +102,10 @@ describe("POST /api/checklist/generate", () => {
   });
 });
 
-describe("POST /api/checklist/evaluate", () => {
+describe("POST /api/v1/checklist/evaluate", () => {
   it("returns 200 with evaluated items for valid input", async () => {
     const generateRes = await request(app)
-      .post("/api/checklist/generate")
+      .post("/api/v1/checklist/generate")
       .send(validProfile);
 
     const input = {
@@ -114,7 +114,7 @@ describe("POST /api/checklist/evaluate", () => {
     };
 
     const res = await request(app)
-      .post("/api/checklist/evaluate")
+      .post("/api/v1/checklist/evaluate")
       .send(input);
 
     expect(res.status).toBe(200);
@@ -134,7 +134,7 @@ describe("POST /api/checklist/evaluate", () => {
     };
 
     const res = await request(app)
-      .post("/api/checklist/evaluate")
+      .post("/api/v1/checklist/evaluate")
       .send(input);
 
     expect(res.status).toBe(200);
@@ -143,7 +143,7 @@ describe("POST /api/checklist/evaluate", () => {
 
   it("returns 400 when body is null", async () => {
     const res = await request(app)
-      .post("/api/checklist/evaluate")
+      .post("/api/v1/checklist/evaluate")
       .send(null);
 
     expect(res.status).toBe(400);
@@ -152,7 +152,7 @@ describe("POST /api/checklist/evaluate", () => {
 
   it("returns 400 when body is a non-object (string)", async () => {
     const res = await request(app)
-      .post("/api/checklist/evaluate")
+      .post("/api/v1/checklist/evaluate")
       .send("not-an-object");
 
     expect(res.status).toBe(400);

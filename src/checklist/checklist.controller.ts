@@ -4,7 +4,7 @@ import type { EvaluateInput } from "./dto/evaluate-checklist.dto.js";
 import * as checklistService from "./checklist.service.js";
 
 /**
- * POST /api/checklist/generate
+ * POST /api/v1/checklist/generate
  * Validates the request body, delegates to the service, and returns
  * the generated checklist with status 201. Returns 400 on invalid input.
  */
@@ -25,7 +25,7 @@ export function generate(req: Request, res: Response, next: NextFunction): void 
 }
 
 /**
- * POST /api/checklist/evaluate
+ * POST /api/v1/checklist/evaluate
  * Validates the request body, delegates to the service, and returns
  * the evaluated items with status 200. Returns 400 on invalid input.
  */

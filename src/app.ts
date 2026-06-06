@@ -13,7 +13,7 @@ if (!config.isProduction) {
   app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openapiSpec));
 }
 
-app.use("/api/checklist", checklistRoutes);
+app.use("/api/v1/checklist", checklistRoutes);
 app.use(errorHandler);
 
 export default app;
