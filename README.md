@@ -14,6 +14,8 @@ npm run dev
 
 The server will start with hot-reloading, meaning it will automatically restart when you save a file.
 
+> **Prerequisite:** Set `DATABASE_URL` in `.env` before running. See [Database Setup](#database-setup).
+
 ## Available Scripts
 
 -   `npm start`: Starts the production server (builds the project first).
@@ -22,6 +24,60 @@ The server will start with hot-reloading, meaning it will automatically restart 
 -   `npm run lint`: Lints the codebase for potential errors.
 -   `npm run format`: Formats the code using Prettier.
 -   `npm test`: Runs all unit tests via Vitest.
+-   `npm run db:push`: Push the Drizzle schema directly to the database (development).
+-   `npm run db:generate`: Generate SQL migration files from schema changes.
+-   `npm run db:migrate`: Apply pending migrations to the database.
+-   `npm run db:studio`: Open Drizzle Studio browser UI to inspect data.
+
+## Database Setup
+
+### Prerequisites
+
+- PostgreSQL 14+ running locally or remotely.
+- A database already created (e.g., `CREATE DATABASE motomedic;`).
+
+### Configuration
+
+Copy the environment template and set your connection string:
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env`:
+
+```
+DATABASE_URL=postgresql://user:password@localhost:5432/motomedic
+```
+
+### Quick Start (Development)
+
+Push the schema directly — no migration files needed:
+
+```bash
+npm run db:push
+```
+
+### Migration Workflow (Production / Team)
+
+Generate migration files from schema changes, then apply them:
+
+```bash
+npm run db:generate
+npm run db:migrate
+```
+
+Commit the generated files in `drizzle/` to version control so other devs can replay the same migrations.
+
+### Schema
+
+All tables and enums are defined in:
+
+```
+src/shared/infrastructure/database/schema.ts
+```
+
+Includes 6 PostgreSQL enums (`bike_type`, `fuel_system`, `cooling_system`, `checklist_status`) and 5 tables (`users`, `bikes`, `bike_owned`, `bike_statuses`, `bike_service_history`) with indexes and foreign keys.
 
 ## Tech Stack
 
