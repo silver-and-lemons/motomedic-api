@@ -28,15 +28,27 @@ The server will start with hot-reloading, meaning it will automatically restart 
 -   `npm run db:generate`: Generate SQL migration files from schema changes.
 -   `npm run db:migrate`: Apply pending migrations to the database.
 -   `npm run db:studio`: Open Drizzle Studio browser UI to inspect data.
+-   `npm run db:seed`: Seeds bike catalog data from `data/bikes_raw.json`.
 
 ## Database Setup
 
-### Prerequisites
+### Option A — Docker (recommended)
 
+Spin up a PostgreSQL container:
+
+```bash
+docker compose up -d
+cp .env.example .env
+npm run db:push
+```
+
+Docker Compose uses default credentials (`postgres:postgres@localhost:5432/motomedic`) unless overridden in `.env`.
+
+### Option B — Local PostgreSQL
+
+**Prerequisites:**
 - PostgreSQL 14+ running locally or remotely.
 - A database already created (e.g., `CREATE DATABASE motomedic;`).
-
-### Configuration
 
 Copy the environment template and set your connection string:
 
@@ -50,12 +62,18 @@ Then edit `.env`:
 DATABASE_URL=postgresql://user:password@localhost:5432/motomedic
 ```
 
-### Quick Start (Development)
-
-Push the schema directly — no migration files needed:
+### Push Schema (Development)
 
 ```bash
 npm run db:push
+```
+
+### Seed Data
+
+Place your `bikes_raw.json` in `data/` and run:
+
+```bash
+npm run db:seed
 ```
 
 ### Migration Workflow (Production / Team)
@@ -77,7 +95,9 @@ All tables and enums are defined in:
 src/shared/infrastructure/database/schema.ts
 ```
 
-Includes 6 PostgreSQL enums (`bike_type`, `fuel_system`, `cooling_system`, `checklist_status`) and 5 tables (`users`, `bikes`, `bike_owned`, `bike_statuses`, `bike_service_history`) with indexes and foreign keys.
+Re-exported via `src/shared/infrastructure/database/index.ts`.
+
+Includes 4 PostgreSQL enums (`bike_type`, `fuel_system`, `cooling_system`, `checklist_status`) and 5 tables (`users`, `bikes`, `bike_owned`, `bike_statuses`, `bike_service_history`) with indexes and foreign keys.
 
 ## Tech Stack
 
