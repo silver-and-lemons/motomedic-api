@@ -4,6 +4,7 @@ import { errorHandler } from "./shared/middleware/error.middleware.js";
 import { config } from "./shared/config/env.js";
 import { openapiSpec } from "./shared/config/openapi.js";
 import checklistRoutes from "./checklist/checklist.routes.js";
+import userProfileRoutes from "./user-profile/user-profile.routes.js";
 
 const app = express();
 
@@ -14,6 +15,7 @@ if (!config.isProduction) {
 }
 
 app.use("/api/v1/checklist", checklistRoutes);
+app.use("/api/v1/user", userProfileRoutes);
 app.use(errorHandler);
 
 export default app;
