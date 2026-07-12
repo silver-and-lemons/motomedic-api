@@ -1,7 +1,7 @@
 import { desc, eq } from "drizzle-orm";
 import { db } from "../shared/infrastructure/database/index.js";
 import { users } from "../shared/infrastructure/database/schema.js";
-import type { GetUserProfileQuery, UserProfileResponse } from "./dto/user-profile.dto.js";
+import type { GetUserProfileQuery, UserProfileResponse, UpsertUserProfileInput } from "./dto/user-profile.dto.js";
 
 function mapUserProfile(user: typeof users.$inferSelect): UserProfileResponse {
 	return {
@@ -16,7 +16,9 @@ function mapUserProfile(user: typeof users.$inferSelect): UserProfileResponse {
 	};
 }
 
-export async function getUserProfileByQuery(query: GetUserProfileQuery): Promise<UserProfileResponse | null> {
+export async function getUserProfileByQuery(
+    query: GetUserProfileQuery
+): Promise<UserProfileResponse | null> {
 	const { email, contactNumber } = query;
 
 	const whereClause = email
@@ -32,4 +34,34 @@ export async function getUserProfileByQuery(query: GetUserProfileQuery): Promise
 	}
 
 	return mapUserProfile(user);
+}
+
+/**
+ * userId and email should be sourced from auth token
+ */
+export async function upsertUserProfile(
+    userId: string, 
+    email: string, 
+    input: UpsertUserProfileInput
+): Promise<UserProfileResponse> {
+    const [insertedUser] = await db
+        .insert(users)
+        .values({
+            id: userId,
+            email: email,
+            fullName: input.fullName,
+            contactNumber: input.contactNumber ?? null,
+            avatarUrl: input.avatarUrl ?? null,
+        })
+        .onConflictDoUpdate({
+            target: users.id,
+            set: {
+                fullName: input.fullName,
+                contactNumber: input.contactNumber ?? null,
+                avatarUrl: input.avatarUrl ?? null,
+            },
+        })
+        .returning();
+
+    return mapUserProfile(insertedUser);
 }
