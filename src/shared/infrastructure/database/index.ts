@@ -1,2 +1,2 @@
-export * from './schema.ts';
-export { db } from '../../config/database.ts';
+export * from './schema.js';
+export { db } from '../../config/database.js';
