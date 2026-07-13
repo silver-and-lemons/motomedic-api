@@ -1,13 +1,13 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     container_name: motomedic-db
     ports:
-      - "5433:5432"
+      - "${DB_PORT:-5432}:5432"
     environment:
-      POSTGRES_USER: motomedic
-      POSTGRES_PASSWORD: motomedic
-      POSTGRES_DB: motomedic
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-motomedic}
     volumes:
       - pgdata:/var/lib/postgresql/data
 
