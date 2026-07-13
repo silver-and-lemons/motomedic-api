@@ -45,7 +45,50 @@ export const users = pgTable('users', {
 });
 
 // ==========================================
-// 2. CORE BIKE CATALOG & OWNERSHIP
+// 2. OTP & REFRESH TOKEN TABLES
+// ==========================================
+export const otpTokens = pgTable(
+  'otp_tokens',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id').notNull(),
+    otpCode: varchar('otp_code', { length: 64 }).notNull(),
+    purpose: varchar('purpose', { length: 20 }).notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    verified: boolean('verified').default(false).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_otp_tokens_user').on(table.userId),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: 'otp_tokens_user_id_fkey',
+    }).onDelete('cascade'),
+  ],
+);
+
+export const refreshTokens = pgTable(
+  'refresh_tokens',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id').notNull(),
+    token: text('token').notNull().unique(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_refresh_tokens_user').on(table.userId),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: 'refresh_tokens_user_id_fkey',
+    }).onDelete('cascade'),
+  ],
+);
+
+// ==========================================
+// 3. CORE BIKE CATALOG & OWNERSHIP
 // ==========================================
 export const bikes = pgTable(
   'bikes',
@@ -95,7 +138,7 @@ export const bikeOwned = pgTable(
 );
 
 // ==========================================
-// 3. DETAILED BIKE STATUS / CHECKLIST LOGS
+// 4. DETAILED BIKE STATUS / CHECKLIST LOGS
 // ==========================================
 export const bikeStatuses = pgTable(
   'bike_statuses',
@@ -136,7 +179,7 @@ export const bikeStatuses = pgTable(
 );
 
 // ==========================================
-// 4. SERVICE HISTORY TRACKING
+// 5. SERVICE HISTORY TRACKING
 // ==========================================
 export const bikeServiceHistory = pgTable(
   'bike_service_history',

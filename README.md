@@ -36,6 +36,34 @@ The server will start with hot-reloading, meaning it will automatically restart 
 - PostgreSQL 14+ running locally or remotely.
 - A database already created (e.g., `CREATE DATABASE motomedic;`).
 
+### Docker Setup (Recommended)
+
+Spin up a PostgreSQL container with Docker Compose:
+
+```bash
+docker compose up -d
+```
+
+This starts PostgreSQL 16 on `localhost:5433` with default credentials (`motomedic/motomedic/motomedic`).
+
+Then push the schema:
+
+```bash
+npm run db:push
+```
+
+To stop the container:
+
+```bash
+docker compose down
+```
+
+To stop and remove all data:
+
+```bash
+docker compose down -v
+```
+
 ### Configuration
 
 Copy the environment template and set your connection string:
@@ -77,13 +105,15 @@ All tables and enums are defined in:
 src/shared/infrastructure/database/schema.ts
 ```
 
-Includes 6 PostgreSQL enums (`bike_type`, `fuel_system`, `cooling_system`, `checklist_status`) and 5 tables (`users`, `bikes`, `bike_owned`, `bike_statuses`, `bike_service_history`) with indexes and foreign keys.
+Includes 6 PostgreSQL enums (`bike_type`, `fuel_system`, `cooling_system`, `checklist_status`) and 7 tables (`users`, `bikes`, `bike_owned`, `bike_statuses`, `bike_service_history`, `otp_tokens`, `refresh_tokens`) with indexes and foreign keys.
 
 ## Tech Stack
 
 -   **Runtime**: Node.js
 -   **Framework**: Express.js
 -   **Language**: TypeScript
+-   **JWT**: jose
+-   **CORS**: cors
 -   **Logger**: Winston
 -   **Linter**: ESLint
 -   **Formatter**: Prettier
@@ -149,19 +179,25 @@ Each feature module under `src/` must include a `README.md` documenting:
 ## Features
 
 ### Environment Configuration — `src/shared/config/env.ts`
-Typed config object with `port`, `nodeEnv`, `isProduction` derived from environment variables.
+Typed config object with `port`, `nodeEnv`, `isProduction`, `corsOrigin` derived from environment variables. See `.env.example` for the full list of required variables.
 
 ### Logger — `src/shared/utils/logger.ts`
 Winston logger with console transport — JSON format in production, colorized in development.
 
 ### Express App — `src/app.ts`
-Express application with `express.json()` body parser and global error handler mounted.
+Express application with CORS, `express.json()` body parser, and global error handler mounted.
 
 ### Server Entry — `server.ts`
 Entry point that imports the configured app and listens on the port from env config.
 
 ### Error Middleware — `src/shared/middleware/error.middleware.ts`
 Centralized error handler that logs the error via Winston and returns a 500 JSON response.
+
+### Auth Middleware — `src/shared/middleware/auth.middleware.ts`
+JWT verification middleware using `jose`. Extracts and validates the Bearer token, attaches the authenticated user to `req.user`. Returns 401 on missing, invalid, or expired tokens.
+
+### Authentication — `src/auth/`
+Phone-number-based OTP authentication with JWT access/refresh token issuance. Riders register with phone, email, and full name; log in with phone only. OTP codes are generated, hashed (SHA-256), and stored with a 5-minute TTL. Access tokens expire in 15 minutes; refresh tokens in 7 days with rotation on use. Mock SMS delivery via console log — swap in a real provider later.
 
 ### OpenAPI Documentation — `src/shared/config/openapi.ts`
 Interactive Swagger UI served at `/api/docs` in non-production environments via swagger-jsdoc annotations in DTO and controller files.

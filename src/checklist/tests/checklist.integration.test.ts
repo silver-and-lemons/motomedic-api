@@ -1,7 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import request from "supertest";
 import app from "../../app.js";
 import type { MotorcycleQuestionnaire } from "../dto/generate-checklist.dto.js";
+
+vi.mock("../../shared/middleware/auth.middleware.js", () => ({
+  authenticate: (_req: unknown, _res: unknown, next: () => void) => next(),
+}));
 
 const validProfile: MotorcycleQuestionnaire = {
   bikeType: "automatic-scooter",
