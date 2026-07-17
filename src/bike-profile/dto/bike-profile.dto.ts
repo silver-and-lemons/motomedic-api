@@ -1,56 +1,30 @@
-export type ChecklistStatus = 'Pass' | 'Fail' | 'N/A';
 
-export type GetChecklistHistoryQuery = {
-    bikeOwnedId: string;
+export type CreateBikeOwnedInput = {
+    bikeId: number;                     // Matches bigint represented as number
+    plateNumber?: string | null;        // Unique, optional identifier
+    chassisNumber?: string | null;      // Optional manufacturer tracking number
+    currentOdometer?: number;           // Defaults to 0 on database level
 };
 
-export type ChecklistHistoryResponse = {
-    id: string;
-    bikeOwnedId: string;
-    loggedAt: Date;
-    odometerAtInspection: number | null;
-    
-    // Main Checklist
-    tyrePressureCondition: ChecklistStatus;
-    engineOilLevel: ChecklistStatus;
-    frontRearBrakes: ChecklistStatus;
-    lights: ChecklistStatus;
-    fuelLevel: ChecklistStatus;
+export type UpdateBikeOwnedInput = {
+    plateNumber?: string | null;
+    chassisNumber?: string | null;
+    currentOdometer?: number;
+    isActive?: boolean;
+};
 
-    // Additional Checklist
-    chainTensionLubrication: ChecklistStatus;
-    sprocketCondition: ChecklistStatus;
-    chokeWarmup: ChecklistStatus;
-    fiWarningLight: ChecklistStatus;
-    coolantLevel: ChecklistStatus;
-    batteryElectricals: ChecklistStatus;
-    brakeFluidLevel: ChecklistStatus;
-    absSelfCheck: ChecklistStatus;
+export type GetBikeOwnedQuery = {
+    bikeOwnedId: string;                // Represents the UUID of the owned record
+};
 
-    remarks: string | null;
+export type BikeOwnedResponse = {
+    id: string;                         // UUID primary key
+    userId: string;                     // Owner UUID reference
+    bikeId: number;                     // Bigint represented as number
+    plateNumber: string | null;
+    chassisNumber: string | null;
+    currentOdometer: number;            // Defaults to 0, represented as integer
+    isActive: boolean;                  // Defaults to true
     createdAt: Date;
-};
-
-export type CreateChecklistLogInput = {
-    bikeOwnedId: string;
-    odometerAtInspection?: number | null;
-    
-    // Main Checklist
-    tyrePressureCondition?: ChecklistStatus;
-    engineOilLevel?: ChecklistStatus;
-    frontRearBrakes?: ChecklistStatus;
-    lights?: ChecklistStatus;
-    fuelLevel?: ChecklistStatus;
-
-    // Additional Checklist
-    chainTensionLubrication?: ChecklistStatus;
-    sprocketCondition?: ChecklistStatus;
-    chokeWarmup?: ChecklistStatus;
-    fiWarningLight?: ChecklistStatus;
-    coolantLevel?: ChecklistStatus;
-    batteryElectricals?: ChecklistStatus;
-    brakeFluidLevel?: ChecklistStatus;
-    absSelfCheck?: ChecklistStatus;
-
-    remarks?: string | null;
+    updatedAt: Date;
 };

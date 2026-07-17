@@ -1,120 +1,147 @@
 import type { OpenAPIV3 } from "openapi-types";
 
-const ChecklistStatusSchema: OpenAPIV3.SchemaObject = {
-    type: "string",
-    enum: ["Pass", "Fail", "N/A"],
-    default: "Pass"
-};
-
-const BikeStatusResponseSchema: OpenAPIV3.SchemaObject = {
+/**
+ * Schema representing BikeOwnedResponse
+ */
+const BikeOwnedResponseSchema: OpenAPIV3.SchemaObject = {
     type: "object",
     required: [
         "id",
-        "bikeOwnedId",
-        "loggedAt",
-        "tyrePressureCondition",
-        "engineOilLevel",
-        "frontRearBrakes",
-        "lights",
-        "fuelLevel",
-        "chainTensionLubrication",
-        "sprocketCondition",
-        "chokeWarmup",
-        "fiWarningLight",
-        "coolantLevel",
-        "batteryElectricals",
-        "brakeFluidLevel",
-        "absSelfCheck",
-        "createdAt"
+        "userId",
+        "bikeId",
+        "currentOdometer",
+        "isActive",
+        "createdAt",
+        "updatedAt"
     ],
     properties: {
-        id: { type: "string", format: "uuid" },
-        bikeOwnedId: { type: "string", format: "uuid" },
-        loggedAt: { type: "string", format: "date-time" },
-        odometerAtInspection: { type: "integer", nullable: true },
-        
-        // Main Checklist
-        tyrePressureCondition: { $ref: "#/components/schemas/ChecklistStatus" },
-        engineOilLevel: { $ref: "#/components/schemas/ChecklistStatus" },
-        frontRearBrakes: { $ref: "#/components/schemas/ChecklistStatus" },
-        lights: { $ref: "#/components/schemas/ChecklistStatus" },
-        fuelLevel: { $ref: "#/components/schemas/ChecklistStatus" },
-        
-        // Additional Checklist
-        chainTensionLubrication: { $ref: "#/components/schemas/ChecklistStatus" },
-        sprocketCondition: { $ref: "#/components/schemas/ChecklistStatus" },
-        chokeWarmup: { $ref: "#/components/schemas/ChecklistStatus" },
-        fiWarningLight: { $ref: "#/components/schemas/ChecklistStatus" },
-        coolantLevel: { $ref: "#/components/schemas/ChecklistStatus" },
-        batteryElectricals: { $ref: "#/components/schemas/ChecklistStatus" },
-        brakeFluidLevel: { $ref: "#/components/schemas/ChecklistStatus" },
-        absSelfCheck: { $ref: "#/components/schemas/ChecklistStatus" },
-        
-        remarks: { type: "string", nullable: true },
-        createdAt: { type: "string", format: "date-time" }
+        id: { 
+            type: "string", 
+            format: "uuid",
+            description: "The unique system UUID for the user's linked bike record."
+        },
+        userId: { 
+            type: "string", 
+            format: "uuid",
+            description: "The UUID of the authenticated owner."
+        },
+        bikeId: { 
+            type: "integer",
+            description: "The underlying global bike model reference ID (bigint mapped to number)."
+        },
+        plateNumber: { 
+            type: "string", 
+            nullable: true,
+            maxLength: 50,
+            description: "The unique license plate number of the vehicle."
+        },
+        chassisNumber: { 
+            type: "string", 
+            nullable: true,
+            maxLength: 100,
+            description: "The manufacturer identification chassis number."
+        },
+        currentOdometer: { 
+            type: "integer", 
+            default: 0,
+            description: "The current recorded distance traveled by the vehicle."
+        },
+        isActive: { 
+            type: "boolean", 
+            default: true,
+            description: "Indicates whether the bike configuration is actively used by the rider."
+        },
+        createdAt: { 
+            type: "string", 
+            format: "date-time" 
+        },
+        updatedAt: { 
+            type: "string", 
+            format: "date-time" 
+        }
     }
 };
 
-const CreateBikeStatusInputSchema: OpenAPIV3.SchemaObject = {
+/**
+ * Schema representing CreateBikeOwnedInput (JSON Request Body)
+ */
+const CreateBikeOwnedInputSchema: OpenAPIV3.SchemaObject = {
     type: "object",
-    required: ["bikeOwnedId"],
+    required: ["bikeId"],
     properties: {
-        bikeOwnedId: { type: "string", format: "uuid" },
-        odometerAtInspection: { type: "integer", nullable: true },
-        
-        // Main Checklist (Optional)
-        tyrePressureCondition: { $ref: "#/components/schemas/ChecklistStatus" },
-        engineOilLevel: { $ref: "#/components/schemas/ChecklistStatus" },
-        frontRearBrakes: { $ref: "#/components/schemas/ChecklistStatus" },
-        lights: { $ref: "#/components/schemas/ChecklistStatus" },
-        fuelLevel: { $ref: "#/components/schemas/ChecklistStatus" },
-        
-        // Additional Checklist (Optional)
-        chainTensionLubrication: { $ref: "#/components/schemas/ChecklistStatus" },
-        sprocketCondition: { $ref: "#/components/schemas/ChecklistStatus" },
-        chokeWarmup: { $ref: "#/components/schemas/ChecklistStatus" },
-        fiWarningLight: { $ref: "#/components/schemas/ChecklistStatus" },
-        coolantLevel: { $ref: "#/components/schemas/ChecklistStatus" },
-        batteryElectricals: { $ref: "#/components/schemas/ChecklistStatus" },
-        brakeFluidLevel: { $ref: "#/components/schemas/ChecklistStatus" },
-        absSelfCheck: { $ref: "#/components/schemas/ChecklistStatus" },
-        
-        remarks: { type: "string", nullable: true }
+        bikeId: { 
+            type: "integer", 
+            description: "The global motorcycle catalog ID to bind." 
+        },
+        plateNumber: { 
+            type: "string", 
+            nullable: true,
+            maxLength: 50 
+        },
+        chassisNumber: { 
+            type: "string", 
+            nullable: true,
+            maxLength: 100 
+        },
+        currentOdometer: { 
+            type: "integer", 
+            default: 0 
+        }
+    }
+};
+
+/**
+ * Schema representing UpdateBikeOwnedInput (JSON Request Body via POST updates)
+ */
+const UpdateBikeOwnedInputSchema: OpenAPIV3.SchemaObject = {
+    type: "object",
+    properties: {
+        plateNumber: { 
+            type: "string", 
+            nullable: true, 
+            maxLength: 50 
+        },
+        chassisNumber: { 
+            type: "string", 
+            nullable: true, 
+            maxLength: 100 
+        },
+        currentOdometer: { 
+            type: "integer" 
+        },
+        isActive: { 
+            type: "boolean" 
+        }
     }
 };
 
 export const bikeProfileOpenapi = {
     schemas: {
-        ChecklistStatus: ChecklistStatusSchema,
-        BikeStatusResponse: BikeStatusResponseSchema,
-        CreateBikeStatusInput: CreateBikeStatusInputSchema
+        BikeOwnedResponse: BikeOwnedResponseSchema,
+        CreateBikeOwnedInput: CreateBikeOwnedInputSchema,
+        UpdateBikeOwnedInput: UpdateBikeOwnedInputSchema
     },
     paths: {
         "/api/v1/bike/profile": {
             get: {
                 tags: ["Bike Profile"],
-                summary: "Get latest saved bike status",
-                description: "Retrieves the single most recent checklist/status row for the authenticated user's bike. Returns null if no records exist.",
+                summary: "Retrieve owned bike configuration details",
+                description: "Gets specific registration and telemetry info for an owned bike. Gated to authenticated requests; returns 404/403 if the record does not exist or belongs to another user.",
                 parameters: [
                     {
                         name: "bikeOwnedId",
                         in: "query",
                         required: true,
                         schema: { type: "string", format: "uuid" },
-                        description: "The unique ID of the owned bike configuration."
+                        description: "The system UUID mapping the motorcycle's record."
                     }
                 ],
                 responses: {
                     200: {
-                        description: "Successfully retrieved latest status, or null if empty.",
+                        description: "Bike registration details retrieved successfully.",
                         content: {
                             "application/json": {
-                                schema: {
-                                    oneOf: [
-                                        { $ref: "#/components/schemas/BikeStatusResponse" },
-                                        { type: "object", nullable: true, example: null }
-                                    ]
-                                }
+                                schema: { $ref: "#/components/schemas/BikeOwnedResponse" }
                             }
                         }
                     },
@@ -122,114 +149,64 @@ export const bikeProfileOpenapi = {
                         description: "Bad Request: Missing bikeOwnedId parameter."
                     },
                     401: {
-                        description: "Unauthorized: Missing authentication context."
+                        description: "Unauthorized: Access token missing or invalid."
                     },
-                    403: {
-                        description: "Forbidden: You do not have permission to access this bike."
+                    404: {
+                        description: "Not Found: No configuration found for this ID under your profile."
                     }
                 }
             },
             post: {
                 tags: ["Bike Profile"],
-                summary: "Create a new bike status entry",
-                description: "Saves a new status configuration checkpoint for the user's bike. Validates that the targeted bike belongs to the authenticated user.",
-                requestBody: {
-                    required: true,
-                    content: {
-                        "application/json": {
-                            schema: { $ref: "#/components/schemas/CreateBikeStatusInput" }
-                        }
-                    }
-                },
-                responses: {
-                    201: {
-                        description: "Bike status successfully created.",
-                        content: {
-                            "application/json": {
-                                schema: { $ref: "#/components/schemas/BikeStatusResponse" }
-                            }
-                        }
-                    },
-                    400: {
-                        description: "Bad Request: Missing bikeOwnedId inside request body."
-                    },
-                    401: {
-                        description: "Unauthorized: Missing authentication context."
-                    },
-                    403: {
-                        description: "Forbidden: You cannot save status logs for a bike you do not own."
-                    }
-                }
-            }
-        },
-        "/api/v1/bike/history": {
-            post: {
-                tags: ["Bike Profile - History Extensions"],
-                summary: "Get checklist history for a bike",
-                description: "Retrieves all pre-ride inspection checklists recorded for a specific bike. Auth-gated and strictly scoped to matching user ownership. (POST method backward-compatibility layer)",
+                summary: "Register a bike or update an existing configuration",
+                description: "Overloaded controller behavior: If `bikeOwnedId` is provided in the query string (or `id` in the request body), it acts as an update patch. If omitted, it registers and maps a new bike profile.",
                 parameters: [
                     {
                         name: "bikeOwnedId",
                         in: "query",
-                        required: true,
+                        required: false,
                         schema: { type: "string", format: "uuid" },
-                        description: "The unique ID of the owned bike configuration."
+                        description: "Provide to transition route behavior into a partial update (PATCH) mode."
                     }
                 ],
-                responses: {
-                    200: {
-                        description: "Successfully retrieved checklist history logs, sorted newest-first.",
-                        content: {
-                            "application/json": {
-                                schema: {
-                                    type: "array",
-                                    items: { $ref: "#/components/schemas/BikeStatusResponse" }
-                                }
-                            }
-                        }
-                    },
-                    400: {
-                        description: "Bad Request: Missing bikeOwnedId parameter."
-                    },
-                    401: {
-                        description: "Unauthorized: Missing authentication context."
-                    },
-                    403: {
-                        description: "Forbidden: You do not have permission to access logs for this bike."
-                    }
-                }
-            }
-        },
-        "/api/v1/bike/save-checklist": {
-            post: {
-                tags: ["Bike Profile - History Extensions"],
-                summary: "Save a new pre-ride checklist entry",
-                description: "Saves a new safety checklist evaluation. Ensures that the targeted bike is owned by the logged-in user. (Compatibility endpoint)",
                 requestBody: {
                     required: true,
                     content: {
                         "application/json": {
-                            schema: { $ref: "#/components/schemas/CreateBikeStatusInput" }
+                            schema: {
+                                oneOf: [
+                                    { $ref: "#/components/schemas/CreateBikeOwnedInput" },
+                                    { $ref: "#/components/schemas/UpdateBikeOwnedInput" }
+                                ]
+                            }
                         }
                     }
                 },
                 responses: {
                     201: {
-                        description: "Checklist run successfully saved to history database.",
+                        description: "Successfully linked new motorcycle configuration to the user account.",
                         content: {
                             "application/json": {
-                                schema: { $ref: "#/components/schemas/BikeStatusResponse" }
+                                schema: { $ref: "#/components/schemas/BikeOwnedResponse" }
+                            }
+                        }
+                    },
+                    200: {
+                        description: "Existing configuration updated successfully.",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/BikeOwnedResponse" }
                             }
                         }
                     },
                     400: {
-                        description: "Bad Request: Missing required properties (such as bikeOwnedId)."
+                        description: "Bad Request: Missing required properties."
                     },
                     401: {
-                        description: "Unauthorized: Missing authentication context."
+                        description: "Unauthorized: Authentication required."
                     },
-                    403: {
-                        description: "Forbidden: You cannot save checklist history logs for a bike you do not own."
+                    404: {
+                        description: "Not Found: Profile update targets a non-existent or un-owned record."
                     }
                 }
             }

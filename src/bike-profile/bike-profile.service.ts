@@ -1,98 +1,90 @@
-import { desc, eq } from "drizzle-orm";
+// bike-profile.service.ts
+import { and, eq } from "drizzle-orm";
 import { db } from "../shared/infrastructure/database/index.js";
-import { bikeStatuses } from "../shared/infrastructure/database/schema.js";
-import type { GetChecklistHistoryQuery, ChecklistHistoryResponse, ChecklistStatus, CreateChecklistLogInput } from "./dto/bike-profile.dto.js";
+import { bikeOwned } from "../shared/infrastructure/database/schema.js";
+import type { 
+    BikeOwnedResponse, 
+    CreateBikeOwnedInput, 
+    UpdateBikeOwnedInput 
+} from "./dto/bike-profile.dto.js";
 
-function mapChecklistRow(row: typeof bikeStatuses.$inferSelect): ChecklistHistoryResponse {
+/**
+ * Maps a raw Drizzle database row from the `bikeOwned` table to our BikeOwnedResponse DTO structure.
+ */
+function mapBikeOwnedRow(row: typeof bikeOwned.$inferSelect): BikeOwnedResponse {
     return {
         id: row.id,
-        bikeOwnedId: row.bikeOwnedId,
-        loggedAt: row.loggedAt,
-        odometerAtInspection: row.odometerAtInspection ?? null,
-        
-        // Coerce or fallback to valid string cast for the enums
-        tyrePressureCondition: (row.tyrePressureCondition ?? 'Pass') as ChecklistStatus,
-        engineOilLevel: (row.engineOilLevel ?? 'Pass') as ChecklistStatus,
-        frontRearBrakes: (row.frontRearBrakes ?? 'Pass') as ChecklistStatus,
-        lights: (row.lights ?? 'Pass') as ChecklistStatus,
-        fuelLevel: (row.fuelLevel ?? 'Pass') as ChecklistStatus,
-        
-        chainTensionLubrication: (row.chainTensionLubrication ?? 'Pass') as ChecklistStatus,
-        sprocketCondition: (row.sprocketCondition ?? 'Pass') as ChecklistStatus,
-        chokeWarmup: (row.chokeWarmup ?? 'Pass') as ChecklistStatus,
-        fiWarningLight: (row.fiWarningLight ?? 'Pass') as ChecklistStatus,
-        coolantLevel: (row.coolantLevel ?? 'Pass') as ChecklistStatus,
-        batteryElectricals: (row.batteryElectricals ?? 'Pass') as ChecklistStatus,
-        brakeFluidLevel: (row.brakeFluidLevel ?? 'Pass') as ChecklistStatus,
-        absSelfCheck: (row.absSelfCheck ?? 'Pass') as ChecklistStatus,
-        
-        remarks: row.remarks ?? null,
+        userId: row.userId,
+        bikeId: row.bikeId,
+        plateNumber: row.plateNumber ?? null,
+        chassisNumber: row.chassisNumber ?? null,
+        currentOdometer: row.currentOdometer ?? 0,
+        isActive: row.isActive ?? true,
         createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
     };
 }
 
 /**
- * Retrieves the history of checklist logs for a specific bike configuration.
- * Results are sorted latest-first.
+ * Retrieves an owned bike profile by its UUID, scoped to a specific owner.
+ * Returns `null` if the record does not exist or the tenancy checks fail.
  */
-export async function getChecklistHistoryByBike(query: GetChecklistHistoryQuery): Promise<ChecklistHistoryResponse[]> {
-    const records = await db
+export async function getBikeOwnedById(id: string, userId: string): Promise<BikeOwnedResponse | null> {
+    const [record] = await db
         .select()
-        .from(bikeStatuses)
-        .where(eq(bikeStatuses.bikeOwnedId, query.bikeOwnedId))
-        .orderBy(desc(bikeStatuses.loggedAt));
+        .from(bikeOwned)
+        .where(
+            and(
+                eq(bikeOwned.id, id),
+                eq(bikeOwned.userId, userId)
+            )
+        )
+        .limit(1);
 
-    return records.map(mapChecklistRow);
+    if (!record) return null;
+    return mapBikeOwnedRow(record);
 }
 
 /**
- * Commits a brand new motorcycle inspection log into the history.
+ * Links/Registers a new motorcycle model to a user profile.
  */
-export async function createChecklistLog(input: CreateChecklistLogInput): Promise<ChecklistHistoryResponse> {
+export async function createBikeOwned(userId: string, input: CreateBikeOwnedInput): Promise<BikeOwnedResponse> {
     const [insertedRow] = await db
-        .insert(bikeStatuses)
+        .insert(bikeOwned)
         .values({
-            bikeOwnedId: input.bikeOwnedId,
-            odometerAtInspection: input.odometerAtInspection ?? null,
-            tyrePressureCondition: input.tyrePressureCondition,
-            engineOilLevel: input.engineOilLevel,
-            frontRearBrakes: input.frontRearBrakes,
-            lights: input.lights,
-            fuelLevel: input.fuelLevel,
-            chainTensionLubrication: input.chainTensionLubrication,
-            sprocketCondition: input.sprocketCondition,
-            chokeWarmup: input.chokeWarmup,
-            fiWarningLight: input.fiWarningLight,
-            coolantLevel: input.coolantLevel,
-            batteryElectricals: input.batteryElectricals,
-            brakeFluidLevel: input.brakeFluidLevel,
-            absSelfCheck: input.absSelfCheck,
-            remarks: input.remarks ?? null,
+            userId: userId,
+            bikeId: input.bikeId,
+            plateNumber: input.plateNumber ?? null,
+            chassisNumber: input.chassisNumber ?? null,
+            currentOdometer: input.currentOdometer ?? 0,
+            isActive: true, // Defaults to true on register
         })
         .returning();
 
-    return mapChecklistRow(insertedRow);
+    return mapBikeOwnedRow(insertedRow);
 }
 
 /**
- * Retrieves the latest checklist/status row for a specific bikeOwnedId.
- * Returns `null` when no records exist.
+ * Updates properties (such as odometer readings, active status, or registration IDs) 
+ * on an owned bike record.
  */
-export async function getLatestChecklistByBike(query: GetChecklistHistoryQuery): Promise<ChecklistHistoryResponse | null> {
-    const records = await db
-        .select()
-        .from(bikeStatuses)
-        .where(eq(bikeStatuses.bikeOwnedId, query.bikeOwnedId))
-        .orderBy(desc(bikeStatuses.loggedAt))
-        .limit(1);
+export async function updateBikeOwned(id: string, userId: string, input: UpdateBikeOwnedInput): Promise<BikeOwnedResponse | null> {
+    const [updatedRow] = await db
+        .update(bikeOwned)
+        .set({
+            plateNumber: input.plateNumber !== undefined ? input.plateNumber : undefined,
+            chassisNumber: input.chassisNumber !== undefined ? input.chassisNumber : undefined,
+            currentOdometer: input.currentOdometer !== undefined ? input.currentOdometer : undefined,
+            isActive: input.isActive !== undefined ? input.isActive : undefined,
+        })
+        .where(
+            and(
+                eq(bikeOwned.id, id),
+                eq(bikeOwned.userId, userId)
+            )
+        )
+        .returning();
 
-    if (!records || records.length === 0) return null;
-    return mapChecklistRow(records[0]);
-}
-
-/**
- * Alias for createChecklistLog with a clearer name for bike-profile surface.
- */
-export async function createBikeStatus(input: CreateChecklistLogInput): Promise<ChecklistHistoryResponse> {
-    return createChecklistLog(input);
+    if (!updatedRow) return null;
+    return mapBikeOwnedRow(updatedRow);
 }

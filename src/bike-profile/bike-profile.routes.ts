@@ -11,8 +11,5 @@ const router = Router();
 router.get("/profile", checklistController.getBikeProfile);
 router.post("/profile", checklistController.postBikeProfile);
 
-// Backwards-compatible checklist history endpoints
-router.post("/history", checklistController.getChecklistHistory);
-router.post("/save-checklist", checklistController.saveChecklistHistory);
 
 export default router;

@@ -1,8 +1,14 @@
+// bike-profile.controller.ts
 import type { NextFunction, Request, Response } from "express";
-import { and, eq } from "drizzle-orm";
-import { db } from "../shared/infrastructure/database/index.js";
-import { bikeOwned } from "../shared/infrastructure/database/schema.js";
-import { createChecklistLog, getChecklistHistoryByBike, getLatestChecklistByBike, createBikeStatus } from "./bike-profile.service.js";
+import { 
+    getBikeOwnedById, 
+    createBikeOwned, 
+    updateBikeOwned 
+} from "./bike-profile.service.js";
+import type { 
+    CreateBikeOwnedInput, 
+    UpdateBikeOwnedInput 
+} from "./dto/bike-profile.dto.js";
 
 function readSingleQueryValue(value: unknown): string | undefined {
     if (typeof value === "string") {
@@ -12,115 +18,13 @@ function readSingleQueryValue(value: unknown): string | undefined {
 }
 
 /**
- * GET /api/v1/checklist/history
- * Retrieves all checklist records for a specific bike configuration.
- * Auth-gated: Validates that the requested bike is owned by the authenticated user.
- */
-export async function getChecklistHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-        // 1. Extract and validate authentication context
-        const authUser = (req as any).user;
-        if (!authUser || !authUser.id) {
-            res.status(401).json({ message: "Unauthorized: Missing authentication context" });
-            return;
-        }
-
-        const userId = authUser.id;
-        const bikeOwnedId = readSingleQueryValue(req.query.bikeOwnedId);
-
-        if (!bikeOwnedId) {
-            res.status(400).json({ message: "Bad Request: Missing bikeOwnedId parameter" });
-            return;
-        }
-
-        // 2. 🔒 Security Boundary: Verify ownership of the requested bike record
-        const [ownershipRecord] = await db
-            .select({ id: bikeOwned.id })
-            .from(bikeOwned)
-            .where(
-                and(
-                    eq(bikeOwned.id, bikeOwnedId),
-                    eq(bikeOwned.userId, userId)
-                )
-            )
-            .limit(1);
-
-        // If no matching ownership record exists, return a 403 Forbidden to prevent data leaks.
-        if (!ownershipRecord) {
-            res.status(403).json({ 
-                message: "Forbidden: You do not have permission to access logs for this bike." 
-            });
-            return;
-        }
-
-        // 3. Fetch logs securely once ownership is proven
-        const history = await getChecklistHistoryByBike({ bikeOwnedId });
-
-        res.status(200).json(history);
-    } catch (error) {
-        next(error);
-    }
-}
-
-/**
- * POST /api/v1/checklist
- * Creates a brand new checklist history entry for a motorcycle.
- * Auth-gated: Validates target bike ownership before processing the insertion.
- */
-export async function saveChecklistHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-        // 1. Extract and validate authentication context
-        const authUser = (req as any).user;
-        if (!authUser || !authUser.id) {
-            res.status(401).json({ message: "Unauthorized: Missing authentication context" });
-            return;
-        }
-
-        const userId = authUser.id;
-        const { bikeOwnedId, ...checklistFields } = req.body;
-
-        if (!bikeOwnedId) {
-            res.status(400).json({ message: "Bad Request: Missing bikeOwnedId inside request body" });
-            return;
-        }
-
-        // 2. 🔒 Security Boundary: Protect records from cross-user injections
-        const [ownershipRecord] = await db
-            .select({ id: bikeOwned.id })
-            .from(bikeOwned)
-            .where(
-                and(
-                    eq(bikeOwned.id, bikeOwnedId),
-                    eq(bikeOwned.userId, userId)
-                )
-            )
-            .limit(1);
-
-        if (!ownershipRecord) {
-            res.status(403).json({ 
-                message: "Forbidden: You cannot save checklist history logs for a bike you do not own." 
-            });
-            return;
-        }
-
-        // 3. Process insertion securely
-        const newLog = await createChecklistLog({
-            bikeOwnedId,
-            ...checklistFields
-        });
-
-        res.status(201).json(newLog);
-    } catch (error) {
-        next(error);
-    }
-}
-
-/**
  * GET /api/v1/bike/profile
- * Returns the latest saved bike status for the authenticated user's bike.
+ * Retrieves the specific owned bike profile configurations.
+ * Query Params: ?bikeOwnedId=UUID
  */
 export async function getBikeProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+        // 1. Extract and validate authentication context
         const authUser = (req as any).user;
         if (!authUser || !authUser.id) {
             res.status(401).json({ message: "Unauthorized: Missing authentication context" });
@@ -135,24 +39,17 @@ export async function getBikeProfile(req: Request, res: Response, next: NextFunc
             return;
         }
 
-        const [ownershipRecord] = await db
-            .select({ id: bikeOwned.id })
-            .from(bikeOwned)
-            .where(
-                and(
-                    eq(bikeOwned.id, bikeOwnedId),
-                    eq(bikeOwned.userId, userId)
-                )
-            )
-            .limit(1);
+        // 2. Query and return record (Tenant-scoping is handled directly inside the service)
+        const bikeProfile = await getBikeOwnedById(bikeOwnedId, userId);
 
-        if (!ownershipRecord) {
-            res.status(403).json({ message: "Forbidden: You do not have permission to access this bike." });
+        if (!bikeProfile) {
+            res.status(404).json({ 
+                message: "Not Found: Bike profile does not exist or you do not have permission to access it." 
+            });
             return;
         }
 
-        const latest = await getLatestChecklistByBike({ bikeOwnedId });
-        res.status(200).json(latest);
+        res.status(200).json(bikeProfile);
     } catch (error) {
         next(error);
     }
@@ -160,10 +57,11 @@ export async function getBikeProfile(req: Request, res: Response, next: NextFunc
 
 /**
  * POST /api/v1/bike/profile
- * Creates a new bike status entry for the authenticated user's bike.
+ * Registers/Creates a brand-new bike profile configuration, OR acts as a PATCH/Update if a bikeOwnedId is supplied to modify the record.
  */
 export async function postBikeProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+        // 1. Extract and validate authentication context
         const authUser = (req as any).user;
         if (!authUser || !authUser.id) {
             res.status(401).json({ message: "Unauthorized: Missing authentication context" });
@@ -171,31 +69,49 @@ export async function postBikeProfile(req: Request, res: Response, next: NextFun
         }
 
         const userId = authUser.id;
-        const { bikeOwnedId, ...checklistFields } = req.body;
+        
+        // Optional parameter to check if we are performing an update rather than registering a new one
+        const bikeOwnedId = readSingleQueryValue(req.query.bikeOwnedId) || req.body.id;
 
-        if (!bikeOwnedId) {
-            res.status(400).json({ message: "Bad Request: Missing bikeOwnedId inside request body" });
+        // 2. CASE A: Update/Modify existing profile
+        if (bikeOwnedId) {
+            const updateInput: UpdateBikeOwnedInput = {
+                plateNumber: req.body.plateNumber,
+                chassisNumber: req.body.chassisNumber,
+                currentOdometer: req.body.currentOdometer,
+                isActive: req.body.isActive,
+            };
+
+            const updatedBike = await updateBikeOwned(bikeOwnedId, userId, updateInput);
+
+            if (!updatedBike) {
+                res.status(404).json({ 
+                    message: "Not Found: Cannot update. Bike profile does not exist or you do not have permission." 
+                });
+                return;
+            }
+
+            res.status(200).json(updatedBike);
             return;
         }
 
-        const [ownershipRecord] = await db
-            .select({ id: bikeOwned.id })
-            .from(bikeOwned)
-            .where(
-                and(
-                    eq(bikeOwned.id, bikeOwnedId),
-                    eq(bikeOwned.userId, userId)
-                )
-            )
-            .limit(1);
+        // 3. CASE B: Register a new profile link
+        const { bikeId, plateNumber, chassisNumber, currentOdometer } = req.body;
 
-        if (!ownershipRecord) {
-            res.status(403).json({ message: "Forbidden: You cannot save status logs for a bike you do not own." });
+        if (bikeId === undefined || bikeId === null) {
+            res.status(400).json({ message: "Bad Request: Missing bikeId in request body" });
             return;
         }
 
-        const newStatus = await createBikeStatus({ bikeOwnedId, ...checklistFields });
-        res.status(201).json(newStatus);
+        const createInput: CreateBikeOwnedInput = {
+            bikeId: Number(bikeId),
+            plateNumber: plateNumber ?? null,
+            chassisNumber: chassisNumber ?? null,
+            currentOdometer: currentOdometer ? Number(currentOdometer) : 0,
+        };
+
+        const newBike = await createBikeOwned(userId, createInput);
+        res.status(201).json(newBike);
     } catch (error) {
         next(error);
     }
