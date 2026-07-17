@@ -9,11 +9,21 @@ function readSingleQueryValue(value: unknown): string | undefined {
 	return undefined;
 }
 
+/**
+ * GET /api/v1/user
+ * Retrieves the profile details of the authenticated user.
+ */
 export async function getUserProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
 	try {
+        const authUser = (req as any).user;
+        if (!authUser || !authUser.id || !authUser.email) {
+            res.status(401).json({ message: "Unauthorized: Missing authentication context" });
+            return;
+        }
+
+        // Only search for the profile linked to the authenticated user's email
 		const user = await getUserProfileByQuery({
-			email: readSingleQueryValue(req.query.email),
-            contactNumber: readSingleQueryValue(req.query.contactNumber)
+			email: authUser.email
 		});
 
 		if (!user) {
@@ -29,8 +39,6 @@ export async function getUserProfile(req: Request, res: Response, next: NextFunc
 
 export async function updateUserProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        // implementation will likely change based on authentication process
-        // TODO: modify according to authentication process/token
         const authUser = (req as any).user;
 
         if (!authUser || !authUser.id || !authUser.email) {
@@ -38,11 +46,8 @@ export async function updateUserProfile(req: Request, res: Response, next: NextF
             return;
         }
 
-        // from authenticated user
         const userId = authUser.id;
         const email = authUser.email;
-
-        // from whatever forms
         const { fullName, contactNumber, avatarUrl } = req.body;
 
         if (!fullName) {
@@ -58,13 +63,8 @@ export async function updateUserProfile(req: Request, res: Response, next: NextF
                 avatarUrl: avatarUrl ?? null,
         });
 
-        if(!user) {
-            res.status(404).json({ message: "User profile not found" });
-            return;
-        }
-
         res.status(200).json(user);
     } catch (error) {
-        next(error)
+        next(error);
     }
 }
