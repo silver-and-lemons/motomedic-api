@@ -1,5 +1,6 @@
 import { checklistOpenapi } from "../../checklist/checklist.openapi.js";
 import { userProfileOpenapi } from "../../user-profile/user-profile.openapi.js";
+import { authOpenapi } from "../../auth/auth.openapi.js";
 
 export const openapiSpec = {
   openapi: "3.0.0",
@@ -12,4 +13,11 @@ export const openapiSpec = {
   servers: [{ url: "http://localhost:3000", description: "Development" }],
   paths: { ...checklistOpenapi.paths, ...userProfileOpenapi.paths },
   components: { schemas: { ...checklistOpenapi.schemas, ...userProfileOpenapi.schemas } },
+  paths: { ...authOpenapi.paths, ...checklistOpenapi.paths },
+  components: {
+    schemas: {
+      ...authOpenapi.schemas,
+      ...checklistOpenapi.schemas,
+    },
+  },
 };
