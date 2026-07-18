@@ -1,4 +1,5 @@
 import { checklistOpenapi } from "../../checklist/checklist.openapi.js";
+import { userProfileOpenapi } from "../../user-profile/user-profile.openapi.js";
 import { authOpenapi } from "../../auth/auth.openapi.js";
 
 export const openapiSpec = {
@@ -10,6 +11,8 @@ export const openapiSpec = {
       "Motorcycle checklist generation and evaluation engine — accepts a rider's bike profile and produces condition-based maintenance checks.",
   },
   servers: [{ url: "http://localhost:3000", description: "Development" }],
+  paths: { ...checklistOpenapi.paths, ...userProfileOpenapi.paths },
+  components: { schemas: { ...checklistOpenapi.schemas, ...userProfileOpenapi.schemas } },
   paths: { ...authOpenapi.paths, ...checklistOpenapi.paths },
   components: {
     schemas: {
