@@ -2,7 +2,9 @@ export const config = {
   port: parseInt(process.env.PORT ?? "3000", 10),
   nodeEnv: process.env.NODE_ENV ?? "development",
   isProduction: process.env.NODE_ENV === "production",
-  corsOrigin: process.env.CORS_ORIGIN ?? "http://localhost:3001",
+  corsOrigin: process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim())
+    : ["http://localhost:3001", "http://localhost:8081"],
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET ?? "dev-access-secret",
     refreshSecret: process.env.JWT_REFRESH_SECRET ?? "dev-refresh-secret",
