@@ -64,8 +64,8 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
       return;
     }
 
-    if (!input.phone) {
-      res.status(400).json({ message: "Phone number is required" });
+    if (!input.identifier) {
+      res.status(400).json({ message: "Email or phone number is required" });
       return;
     }
 

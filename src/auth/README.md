@@ -33,7 +33,7 @@ src/auth/
 
 ### Login
 
-1. `POST /api/v1/auth/login` — `{ phone }` → sends OTP to existing user
+1. `POST /api/v1/auth/login` — `{ identifier }` → sends OTP to existing user (email or phone)
 2. `POST /api/v1/auth/verify-login` — `{ userId, otp }` → verifies OTP, returns token pair
 
 ### Token Management
@@ -49,11 +49,11 @@ Creates a new rider account. Returns `{ userId, message }`. Returns 409 if phone
 
 ### `POST /api/v1/auth/verify-otp`
 
-Verifies the OTP for registration. Returns `{ accessToken, refreshToken, user, hasBikeProfile }`. The `hasBikeProfile` boolean tells the frontend to route to bike selection (false) or dashboard (true).
+Verifies the OTP for registration. Returns `{ accessToken, refreshToken, expiresIn, user, hasBikeProfile }`. The `hasBikeProfile` boolean tells the frontend to route to bike selection (false) or dashboard (true).
 
 ### `POST /api/v1/auth/login`
 
-Sends an OTP to an existing rider's phone. Returns `{ userId, message }`. Returns 404 if phone not found.
+Sends an OTP to an existing rider's email or phone. Returns `{ userId, message }`. Returns 404 if the identifier is not found.
 
 ### `POST /api/v1/auth/verify-login`
 
@@ -61,7 +61,7 @@ Verifies the OTP for login. Same response as verify-otp.
 
 ### `POST /api/v1/auth/refresh`
 
-Rotates the refresh token. Returns new `{ accessToken, refreshToken }`. Returns 401 if token is invalid, expired, or already used.
+Rotates the refresh token. Returns new `{ accessToken, refreshToken, expiresIn }`. Returns 401 if token is invalid, expired, or already used.
 
 ### `POST /api/v1/auth/logout`
 

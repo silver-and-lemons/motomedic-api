@@ -29,9 +29,9 @@ const VerifyOtpInput: OpenAPIV3.SchemaObject = {
 /** Schema for the login input. */
 const LoginInput: OpenAPIV3.SchemaObject = {
   type: "object",
-  required: ["phone"],
+  required: ["identifier"],
   properties: {
-    phone: { type: "string", example: "+639123456789" },
+    identifier: { type: "string", example: "+639123456789" },
   },
 };
 
@@ -61,6 +61,7 @@ const AuthTokens: OpenAPIV3.SchemaObject = {
   properties: {
     accessToken: { type: "string" },
     refreshToken: { type: "string" },
+    expiresIn: { type: "number", description: "Access token lifetime in seconds" },
   },
 };
 
@@ -88,6 +89,7 @@ const VerifyOtpResponse: OpenAPIV3.SchemaObject = {
   properties: {
     accessToken: { type: "string" },
     refreshToken: { type: "string" },
+    expiresIn: { type: "number", description: "Access token lifetime in seconds" },
     user: { $ref: "#/components/schemas/AuthUser" },
     hasBikeProfile: { type: "boolean" },
   },
@@ -171,7 +173,7 @@ const loginPath: OpenAPIV3.PathsObject = {
   "/api/v1/auth/login": {
     post: {
       tags: ["Auth"],
-      summary: "Login with phone number",
+      summary: "Login with email or phone number",
       requestBody: {
         required: true,
         content: {
@@ -189,8 +191,8 @@ const loginPath: OpenAPIV3.PathsObject = {
             },
           },
         },
-        400: { description: "Missing phone number" },
-        404: { description: "No account found with this phone number" },
+        400: { description: "Missing email or phone number" },
+        404: { description: "No account found with this email or phone" },
       },
     },
   },

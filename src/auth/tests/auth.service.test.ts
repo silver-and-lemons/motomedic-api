@@ -7,6 +7,7 @@ vi.mock("../../shared/config/database.js", () => ({
     insert: vi.fn().mockReturnThis(),
     update: vi.fn().mockReturnThis(),
     delete: vi.fn().mockReturnThis(),
+    values: vi.fn().mockResolvedValue([]),
     from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
     limit: vi.fn().mockResolvedValue([]),
@@ -95,8 +96,16 @@ describe("Auth Service", () => {
       mockSelectChain([]);
 
       await expect(
-        authService.loginUser({ phone: "+639123456789" }),
-      ).rejects.toThrow("No account found with this phone number");
+        authService.loginUser({ identifier: "+639123456789" }),
+      ).rejects.toThrow("No account found with this email or phone");
+    });
+
+    it("should send OTP when logging in by email", async () => {
+      mockSelectChain([{ id: "user-123" }]);
+
+      await expect(
+        authService.loginUser({ identifier: "rider@example.com" }),
+      ).resolves.toEqual({ userId: "user-123", message: "OTP sent to your phone number" });
     });
   });
 

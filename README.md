@@ -217,7 +217,7 @@ Centralized error handler that logs the error via Winston and returns a 500 JSON
 JWT verification middleware using `jose`. Extracts and validates the Bearer token, attaches the authenticated user to `req.user`. Returns 401 on missing, invalid, or expired tokens.
 
 ### Authentication — `src/auth/`
-Phone-number-based OTP authentication with JWT access/refresh token issuance. Riders register with phone, email, and full name; log in with phone only. OTP codes are generated, hashed (SHA-256), and stored with a 5-minute TTL. Access tokens expire in 15 minutes; refresh tokens in 7 days with rotation on use. Mock SMS delivery via console log — swap in a real provider later.
+Phone-number or email OTP authentication with JWT access/refresh token issuance. Riders register with phone, email, and full name; log in with either email or phone. OTP codes are generated, hashed (SHA-256), and stored with a 5-minute TTL. Access tokens expire in 15 minutes (returned as `expiresIn` in seconds); refresh tokens in 7 days with rotation on use. Mock SMS delivery via console log — swap in a real provider later.
 
 ### OpenAPI Documentation — `src/shared/config/openapi.ts`
 Interactive Swagger UI served at `/api/docs` in non-production environments via swagger-jsdoc annotations in DTO and controller files.

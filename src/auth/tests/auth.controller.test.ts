@@ -101,15 +101,15 @@ describe("Auth Controller", () => {
   });
 
   describe("login", () => {
-    it("should return 400 if phone is missing", async () => {
+    it("should return 400 if identifier is missing", async () => {
       req.body = {};
       await authController.login(req as Request, res as Response, next);
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: "Phone number is required" });
+      expect(res.json).toHaveBeenCalledWith({ message: "Email or phone number is required" });
     });
 
     it("should return 200 on success", async () => {
-      req.body = { phone: "+639123456789" };
+      req.body = { identifier: "+639123456789" };
       vi.mocked(authService.loginUser).mockResolvedValue({ userId: "user-123", message: "OTP sent" });
       await authController.login(req as Request, res as Response, next);
       expect(res.status).toHaveBeenCalledWith(200);

@@ -1,6 +1,6 @@
 import { createHash, randomInt } from "node:crypto";
 import { SignJWT, jwtVerify } from "jose";
-import { eq, and, gt } from "drizzle-orm";
+import { eq, and, or, gt } from "drizzle-orm";
 import { db } from "../shared/config/database.js";
 import { config } from "../shared/config/env.js";
 import { users, otpTokens, refreshTokens, bikeOwned } from "../shared/infrastructure/database/schema.js";
@@ -46,7 +46,7 @@ async function issueTokenPair(userId: string): Promise<AuthTokens> {
     expiresAt: refreshExpiresAt,
   });
 
-  return { accessToken, refreshToken };
+  return { accessToken, refreshToken, expiresIn: 15 * 60 };
 }
 
 export async function registerUser(input: RegisterInput): Promise<{ userId: string; message: string }> {
@@ -80,11 +80,11 @@ export async function loginUser(input: LoginInput): Promise<{ userId: string; me
   const [user] = await db
     .select()
     .from(users)
-    .where(eq(users.contactNumber, input.phone))
+    .where(or(eq(users.contactNumber, input.identifier), eq(users.email, input.identifier)))
     .limit(1);
 
   if (!user) {
-    throw new AppError("USER_NOT_FOUND", "No account found with this phone number", 404);
+    throw new AppError("USER_NOT_FOUND", "No account found with this email or phone", 404);
   }
 
   await sendOtp(user.id, "login");

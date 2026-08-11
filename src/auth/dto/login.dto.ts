@@ -1,3 +1,3 @@
 export interface LoginInput {
-  phone: string;
+  identifier: string;
 }

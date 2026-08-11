@@ -64,7 +64,7 @@ describe("Auth Integration", () => {
   });
 
   describe("POST /api/v1/auth/login", () => {
-    it("should return 400 if phone is missing", async () => {
+    it("should return 400 if identifier is missing", async () => {
       const res = await request(app).post("/api/v1/auth/login").send({});
       expect(res.status).toBe(400);
       expect(res.body.message).toContain("required");
